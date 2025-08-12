@@ -11,11 +11,9 @@ type Props = {
 }
 
 function AllToDos({ todos, listId }: Props) {
-
   const { mutate: toggleTodo } = useToggleTodo()
   const { mutate: deleteTodo } = useDeleteTodo()
   const { mutate: editTodo } = useEditTodo()
-
   const [editId, setEditId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
 
@@ -32,41 +30,54 @@ function AllToDos({ todos, listId }: Props) {
     }
   }
 
+  const handleKeyPress = (e: React.KeyboardEvent, id: string) => {
+    if (e.key === 'Enter') {
+      handleEditSubmit(id)
+    }
+    if (e.key === 'Escape') {
+      setEditId(null)
+      setEditValue('')
+    }
+  }
+
   return (
     <ul className="flex flex-col gap-4 animate-fade-in">
       {todos.map((todo) => (
         <li
           key={todo._id}
-          className={`flex justify-between items-center bg-gray-900 text-white rounded-lg px-4 py-3 shadow-md transition-all duration-300 ${
+          className={`flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-900 text-white rounded-lg px-2 sm:px-4 py-2 sm:py-3 shadow-md transition-all duration-300 ${
             todo.completed ? 'opacity-50' : 'hover:shadow-lg'
           }`}
         >
-          <div className="flex items-center gap-3 w-full">
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo._id)}
-              className="w-5 h-5 accent-purple-600"
-            />
-
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <div className="flex items-center justify-center flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo._id)}
+                className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 accent-purple-600 transition-all cursor-pointer"
+              />
+            </div>
             {editId === todo._id ? (
-              <div className="flex w-full gap-2">
+              <div className="flex flex-col xs:flex-row w-full gap-1 sm:gap-2 min-w-0">
                 <input
                   type="text"
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
-                  className="w-full px-3 py-1 rounded-md bg-gray-800 border border-gray-600 text-white outline-none focus:ring-2 focus:ring-purple-500 transition"
+                  onKeyDown={(e) => handleKeyPress(e, todo._id)}
+                  className="flex-1 min-w-0 px-2 py-1 text-xs sm:text-sm md:text-base rounded bg-gray-800 border border-gray-600 text-white outline-none focus:ring-1 focus:ring-purple-500 transition"
+                  autoFocus
                 />
                 <button
                   onClick={() => handleEditSubmit(todo._id)}
-                  className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-md transition-all duration-300"
+                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 rounded transition-all duration-300 flex-shrink-0 touch-manipulation"
                 >
                   Save
                 </button>
               </div>
             ) : (
               <span
-                className={`flex-grow text-base sm:text-lg transition-all duration-300 ${
+                className={`flex-1 min-w-0 text-xs sm:text-sm md:text-base lg:text-lg transition-all duration-300 break-words leading-tight sm:leading-normal ${
                   todo.completed ? 'line-through text-gray-400' : ''
                 }`}
               >
@@ -74,20 +85,21 @@ function AllToDos({ todos, listId }: Props) {
               </span>
             )}
           </div>
-
           {editId !== todo._id && (
-            <div className="flex gap-3 ml-4">
+            <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-0 sm:ml-4 justify-end sm:justify-start flex-shrink-0">
               <button
                 onClick={() => handleEdit(todo._id, todo.task)}
-                className="text-purple-400 hover:text-purple-600 transition"
+                className="text-purple-400 hover:text-purple-600 transition p-1 touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
+                aria-label="Edit todo"
               >
-                <Pencil size={18} />
+                <Pencil size={14} className="sm:w-4 sm:h-4" />
               </button>
               <button
-                onClick={() => deleteTodo({todoId: todo._id, listId: listId})}
-                className="text-red-400 hover:text-red-600 transition"
+                onClick={() => deleteTodo({ todoId: todo._id, listId: listId })}
+                className="text-red-400 hover:text-red-600 transition p-1 touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
+                aria-label="Delete todo"
               >
-                <Trash2 size={18} />
+                <Trash2 size={14} className="sm:w-4 sm:h-4" />
               </button>
             </div>
           )}
